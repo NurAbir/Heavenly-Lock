@@ -58,7 +58,7 @@ Go to [Releases](../../releases/latest) and download:
 ### Steps
 
 ```powershell
-git clone https://github.com/your-username/HeavenlyLock.git
+https://github.com/NurAbir/Heavenly-Lock
 cd HeavenlyLock
 
 # Build portable EXE + installer in one command
