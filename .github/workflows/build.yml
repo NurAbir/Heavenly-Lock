@@ -54,10 +54,6 @@ jobs:
             -p:DebugSymbols=false `
             --output publish
 
-      - name: Rename portable EXE
-        run: Copy-Item publish\HeavenlyLock.exe dist\HeavenlyLock-Portable.exe
-        shell: pwsh
-
       # -- Inno Setup installer -------------------------------------------------
       - name: Install Inno Setup
         run: choco install innosetup --no-progress -y
