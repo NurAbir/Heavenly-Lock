@@ -1,0 +1,104 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [ main ]
+    tags:     [ 'v*.*.*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build (Windows x64)
+    runs-on: windows-latest
+
+    steps:
+      # -- Checkout ------------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # -- .NET 8 SDK ----------------------------------------------------------
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # -- Cache NuGet ---------------------------------------------------------
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-
+
+      # -- Restore -------------------------------------------------------------
+      - name: Restore dependencies
+        run: dotnet restore HeavenlyLock/HeavenlyLock.csproj
+
+      # -- Build (validate) ----------------------------------------------------
+      - name: Build
+        run: dotnet build HeavenlyLock/HeavenlyLock.csproj -c Release --no-restore
+
+      # -- Publish portable single-file EXE ------------------------------------
+      - name: Publish portable EXE
+        run: |
+          dotnet publish HeavenlyLock/HeavenlyLock.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:EnableCompressionInSingleFile=true `
+            -p:PublishReadyToRun=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:DebugType=none `
+            -p:DebugSymbols=false `
+            --output publish
+
+      - name: Rename portable EXE
+        run: Copy-Item publish\HeavenlyLock.exe dist\HeavenlyLock-Portable.exe
+        shell: pwsh
+
+      # -- Inno Setup installer -------------------------------------------------
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Build installer
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\HeavenlyLock.iss /Odist
+        shell: pwsh
+
+      # -- Upload build artifacts (every push) ---------------------------------
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: HeavenlyLock-${{ github.sha }}
+          path: |
+            dist/HeavenlyLock-Portable.exe
+            dist/HeavenlyLock-Setup.exe
+          retention-days: 14
+
+      # -- Create GitHub Release (on tag push only) -----------------------------
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: HeavenlyLock ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            dist/HeavenlyLock-Portable.exe
+            dist/HeavenlyLock-Setup.exe
+          body: |
+            ## HeavenlyLock ${{ github.ref_name }}
+
+            ### Downloads
+            | File | Description |
+            |---|---|
+            | `HeavenlyLock-Setup.exe` | Windows installer (recommended) |
+            | `HeavenlyLock-Portable.exe` | No install needed -- run from anywhere |
+
+            ### What's changed
+            _Update this section before tagging a release._
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
