@@ -323,5 +323,5 @@ Single-file self-contained .NET executables are sometimes flagged as suspicious 
 
 <p align="center">
   HeavenlyLock v1.0.0 -- MIT License<br/>
-  <a href="https://github.com/your-username/HeavenlyLock">github.com/your-username/HeavenlyLock</a>
+  <a href="https://github.com/NurAbir/Heavenly-Lock">github.com/NurAbir/HeavenlyLock</a>
 </p>
