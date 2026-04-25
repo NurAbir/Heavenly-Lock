@@ -57,9 +57,9 @@ Name: "startmenuicon"; Description: "Create a Start Menu shortcut"; GroupDescrip
 Source: "{#PortableExe}"; DestDir: "{app}"; DestName: "{#AppExeName}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\{#AppName}";           Filename: "{app}\{#AppExeName}"; Tasks: startmenuicon
-Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\{#AppName}";   Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
+Name: "{userprograms}\{#AppName}";           Filename: "{app}\{#AppExeName}"; Tasks: startmenuicon
+Name: "{userprograms}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
+Name: "{userdesktop}\{#AppName}";            Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(AppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
